@@ -1,12 +1,12 @@
 # Unity Xlsx Inspector
 
-English | [简体中文](README.zh-CN.md)
+Edit `.xlsx` and `.csv` files directly in the Unity Inspector. Select a file in the Project window, edit its cells in the Inspector, then save back to the original file.
 
-Edit `.xlsx` and `.csv` files directly in the Unity Inspector. Select a file in Project, edit its cells, and save it back to the original file. No separate window or Excel installation is needed. Asset icons and importers are kept.
+English | [简体中文](README.zh-CN.md)
 
 ![XLSX editing in the Inspector](image/README.zh-CN/1793945502651.png)
 
-## Requirements
+## 1. Requirements
 
 - Unity **2022.3 LTS or newer**, including Unity 6.
 - **.NET Standard 2.1** API compatibility.
@@ -17,7 +17,7 @@ Edit `.xlsx` and `.csv` files directly in the Unity Inspector. Select a file in 
 | 2022.3.62f3 | Windows | EditMode tests |
 | 6000.0.70f1 | Windows | EditMode tests |
 
-## Installation
+## 2. Installation
 
 Open **Window → Package Manager → + → Install package from git URL** and paste:
 
@@ -25,11 +25,9 @@ Open **Window → Package Manager → + → Install package from git URL** and p
 https://github.com/zheliku/UnityXlsxInspector.git?path=/Packages/com.zheliku.unity-xlsx-inspector
 ```
 
-You can also copy `Packages/com.zheliku.unity-xlsx-inspector` into your project's `Packages` folder.
+## 3. Features
 
-## Features
-
-### Cell editing and clipboard
+### 3.1 Cell editing and clipboard
 
 Double-click a cell or press **F2** to edit it. **Enter** commits and moves down; **Tab** moves right; **Esc** cancels the current input. The edit bar supports multiline text.
 
@@ -37,33 +35,33 @@ Select a range by dragging or Shift-clicking. Copy, cut, paste, clear, Undo and 
 
 ![Inline cell editing](image/cell-editing.png)
 
-### Worksheets
+### 3.2 Worksheets
 
 XLSX worksheet tabs stay inside the Inspector width. Browse with the mouse wheel or horizontal scrollbar, use **‹ / ›** for the previous/next sheet, or **▾** to choose from the complete list. Switching sheets brings the active tab into view. CSV has no worksheet bar.
 
 ![Worksheet navigation](image/worksheet-tabs.png)
 
-### Rows, columns and sizing
+### 3.3 Rows, columns and sizing
 
 **Rows / Columns** inserts or deletes one or many rows and columns. The row-header **+** inserts below the selection; the column-header **+** inserts to its right. Right-click a **+** to set the count. Inserting and deleting shift existing cells; **Clear** empties them in place.
 
 ![Bulk row insertion](image/batch-insert.png)
 
-Drag header edges to resize rows and columns, or enter **Width / Height** for the whole selection. **Auto Fit** measures the contents; double-clicking a header edge fits that row or column. **Format** and the cell context menu provide horizontal/vertical alignment and text wrapping.
+Drag header edges to resize rows and columns, or use **Width / Height** for precise values across the selection. The input row is shown by default; close it when you need more space and reopen it from **Format → Column Width and Row Height**. **Auto Fit** measures the contents; double-clicking a header edge fits that row or column. **Format** and the cell context menu also provide horizontal/vertical alignment and text wrapping.
 
 Drag the bar below the grid to adjust its height. The content range stays bright, while empty space is dimmed. The empty preview grows as you scroll or drag a selection; after returning and releasing the mouse, offscreen empty space is reclaimed so scrollbar thumbs grow again. Filled cells stay in range.
 
 ![Range sizing, alignment and wrapping](image/range-formatting.png)
 
-### CSV and search
+### 3.4 CSV and search
 
 CSV detects **comma, semicolon, Tab and pipe (`|`)** delimiters. Saving preserves the delimiter, encoding, record line endings and field spaces. Supported encodings are UTF-8 with or without BOM, and UTF-16/32 with BOM. Quoted fields can contain delimiters, quotes and line breaks.
 
-Search ignores case. Matching cells get a marker; **Find Next** moves through the current worksheet.
+Click **Find** in the toolbar or press **Ctrl/Cmd+F** to open and focus search. **Ctrl/Cmd+H** opens Replace. The Find/Replace bar supports **Aa** (Match Case), **ab** (Whole Word), `.*` (Regex), and selection scope. Counts show matching cells; **↑ / ↓** navigate them. Expand **›** to replace the current matching cell or all results. Regex uses .NET syntax, including `$1` capture groups in replacements.
 
 ![Pipe-delimited CSV search](image/search.png)
 
-### Layout and colors
+### 3.5 Layout and colors
 
 Open **Edit → Project Settings → Unity Xlsx Inspector**, or click **Settings** in the Inspector toolbar.
 
@@ -77,11 +75,11 @@ Open **Edit → Project Settings → Unity Xlsx Inspector**, or click **Settings
 
 ![Project settings](image/settings.png)
 
-CSV display formatting, panel height, active worksheet and scroll positions are remembered on this computer per project and asset. Shared defaults live in `ProjectSettings/UnityXlsxInspector.asset`. XLSX dimensions and alignment are saved in the workbook. Grid font size and colors only affect the Inspector.
+CSV display formatting, panel height, active worksheet and scroll positions are remembered on this computer per project and asset. Shared defaults live in `ProjectSettings/UnityXlsxInspector.asset`.
 
 ![Dark theme](image/dark-theme.png)
 
-## Shortcuts
+## 4. Shortcuts
 
 | Shortcut | Action |
 | --- | --- |
@@ -92,28 +90,14 @@ CSV display formatting, panel height, active worksheet and scroll positions are 
 | Shift+click / Shift+arrow | Extend the selection |
 | Ctrl+A / C / X / V | Select the content range / copy / cut / paste |
 | Delete / Backspace | Clear selected contents |
+| Ctrl+F / Ctrl+H | Find / replace |
+| Enter / Shift+Enter in Find | Next / previous match |
+| F3 / Shift+F3 | Next / previous match |
 | Ctrl+S / Z | Save / undo |
 | Ctrl+Y / Ctrl+Shift+Z | Redo |
 
-Use **Cmd** instead of Ctrl on macOS. When a text field has focus, clipboard shortcuts act on its text.
+On macOS, you can use **Cmd** instead of Ctrl.
 
-## File behavior
+## 5. License
 
-- XLSX keeps numbers and booleans as their types; `001` stays text. Start with `'` to force text or `=` for a formula. Formula previews use cached results; Excel/WPS recalculates them when opened.
-- The grid displays cell contents, basic alignment, wrapping and dimensions. Merged layouts, workbook fonts, charts and conditional formatting are not rendered. Workbook round-tripping uses ClosedXML.
-- Drafts are stored in `Library/XlsxInspector`; Undo history lasts for the current Editor session. **Reload** asks before discarding edits. Saving checks for external file changes and keeps pending edits if a conflict or file lock prevents writing.
-- Workbooks and Undo snapshots are loaded in memory. This package is intended for configuration tables. Cached package assets are read-only.
-
-CSV detection samples the first 20 logical records. Ambiguous files may need their delimiter made consistent. [RFC 4180](https://www.rfc-editor.org/rfc/rfc4180) describes comma-separated CSV; semicolon, Tab and pipe are supported dialects, as described by [CSVW](https://www.w3.org/TR/tabular-metadata/#dialect-descriptions).
-
-## Development
-
-Source is in `Packages/com.zheliku.unity-xlsx-inspector`. Install Unity Test Framework, add `"testables": ["com.zheliku.unity-xlsx-inspector"]` to the project manifest, then run **Test Runner → EditMode → XlsxInspector.Tests**. UI tests need a graphics-enabled Editor and a system clipboard.
-
-[Code guide](Packages/com.zheliku.unity-xlsx-inspector/Documentation~/code-guide.md) · [Changelog](Packages/com.zheliku.unity-xlsx-inspector/CHANGELOG.md) · [Release guide](Packages/com.zheliku.unity-xlsx-inspector/Documentation~/releasing.md)
-
-## License
-
-Project code is [MIT](LICENSE.md). Most bundled libraries are MIT, including ClosedXML, Open XML SDK, ExcelNumberFormat, RBush and the two System assemblies. **SixLabors.Fonts 1.0.0 uses Apache-2.0**; ClosedXML's embedded **CarlitoBare font data uses SIL OFL 1.1**. Their license texts and notices are included in the package.
-
-See [Third Party Notices](Packages/com.zheliku.unity-xlsx-inspector/Third%20Party%20Notices.md) for dependency versions, upstream links and full licenses.
+Project code and all **seven bundled library assemblies** use **MIT**. Dependency versions and original copyright notices are in [Third Party Notices](Packages/com.zheliku.unity-xlsx-inspector/Third%20Party%20Notices.md).

@@ -161,32 +161,6 @@ namespace XlsxInspector
         }
 
 
-        private void FindNext()
-        {
-            Run(() =>
-            {
-                CommitEdit();
-                int width = _document.ColumnCount;
-                long count = (long)_document.RowCount * width;
-                long start = (long)_selected.y * width + _selected.x;
-                for (long step = 1; step <= count; step++)
-                {
-                    long index = (start + step) % count;
-                    int row = (int)(index / width);
-                    int column = (int)(index % width);
-                    if (_document.GetText(row, column, true).IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        Select(row, column, false);
-                        RevealSelection();
-                        Repaint();
-                        return;
-                    }
-                }
-                _error = "No matching cells on this sheet.";
-            });
-        }
-
-
         // 格内编辑优先处理 Enter / Tab / Esc，避免 TextArea 把提交键当成普通换行。
         // 编辑栏保留多行文本编辑；不在文本框内时才处理选区复制和方向键移动。
         private void HandleKeyboard()
@@ -197,6 +171,23 @@ namespace XlsxInspector
                 return;
             }
             bool command = current.control || current.command;
+            if (HandleSearchKeyboard(current))
+            {
+                return;
+            }
+            if (command && (current.keyCode == KeyCode.F || current.keyCode == KeyCode.H))
+            {
+                OpenSearch(current.keyCode == KeyCode.H);
+                current.Use();
+                return;
+            }
+            if (current.keyCode == KeyCode.F3)
+            {
+                _showSearch = true;
+                FindMatch(current.shift);
+                current.Use();
+                return;
+            }
             if (command && (current.keyCode == KeyCode.Z || current.keyCode == KeyCode.Y))
             {
                 bool redo = current.keyCode == KeyCode.Y || current.shift;
@@ -230,7 +221,7 @@ namespace XlsxInspector
                 }
                 return;
             }
-            if (EditorGUIUtility.editingTextField)
+            if (EditorGUIUtility.editingTextField || HasSearchTextFocus)
             {
                 return;
             }

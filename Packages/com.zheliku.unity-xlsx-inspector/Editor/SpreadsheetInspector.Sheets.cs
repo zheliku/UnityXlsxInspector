@@ -29,7 +29,7 @@ namespace XlsxInspector
                 _sheetTabEdges[index + 1] = _sheetTabEdges[index] + width + 2;
             }
 
-            // GUI.BeginScrollView 使用明确的矩形裁切，不让标签的总宽度参与 GUILayout 的最小宽度计算。
+            // 页签复用原生横向滚动条和 Group 裁切，不再嵌套第二个有独立状态的 ScrollView。
             if (Event.current.type == EventType.Repaint)
             {
                 _sheetTabsRect = area;
@@ -89,8 +89,13 @@ namespace XlsxInspector
             {
                 _sheetScroll = new Vector2(Mathf.Clamp(_sheetScroll.x, 0, Mathf.Max(0, contentWidth - viewport.width)), 0);
             }
-            _sheetScroll = GUI.BeginScrollView(viewport, _sheetScroll, new Rect(0, 0, contentWidth, SheetTabHeight),
-                false, false, GUI.skin.horizontalScrollbar, GUIStyle.none);
+            if (contentWidth > viewport.width)
+            {
+                _sheetScroll.x = GUI.HorizontalScrollbar(new Rect(viewport.x, viewport.y + SheetTabHeight,
+                    viewport.width, GUI.skin.horizontalScrollbar.fixedHeight), _sheetScroll.x, viewport.width, 0, contentWidth);
+            }
+            GUI.BeginGroup(new Rect(viewport.x, viewport.y, viewport.width, SheetTabHeight));
+            GUI.BeginGroup(new Rect(-_sheetScroll.x, 0, contentWidth, SheetTabHeight));
             for (int index = 0; index < _document.SheetNames.Length; index++)
             {
                 var tab = new Rect(_sheetTabEdges[index], 0, _sheetTabEdges[index + 1] - _sheetTabEdges[index] - 2, SheetTabHeight);
@@ -105,7 +110,8 @@ namespace XlsxInspector
                     EditorGUI.DrawRect(new Rect(tab.x, tab.yMax - 3, tab.width, 3), Accent);
                 }
             }
-            GUI.EndScrollView();
+            GUI.EndGroup();
+            GUI.EndGroup();
         }
 
         private void SwitchSheet(int index)

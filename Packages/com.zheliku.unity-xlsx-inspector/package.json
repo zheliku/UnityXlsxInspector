@@ -1,6 +1,6 @@
 {
   "name": "com.zheliku.unity-xlsx-inspector",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "displayName": "Unity Xlsx Inspector",
   "description": "Preview and edit Excel workbooks and CSV files directly in the Unity Inspector.",
   "unity": "2022.3",

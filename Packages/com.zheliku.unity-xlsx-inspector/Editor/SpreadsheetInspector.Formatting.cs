@@ -41,6 +41,12 @@ namespace XlsxInspector
                     () => ApplyFormat(vertical: value));
             }
             menu.AddItem(new GUIContent("Wrap text"), current.WrapText, () => ApplyFormat(wrapText: !current.WrapText));
+            menu.AddSeparator("");
+            menu.AddItem(new GUIContent("Column Width and Row Height"), _showDimensions, () =>
+            {
+                _showDimensions = !_showDimensions;
+                Repaint();
+            });
         }
 
         private void ApplyFormat(HorizontalCellAlignment? horizontal = null, VerticalCellAlignment? vertical = null,

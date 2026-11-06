@@ -2,6 +2,42 @@
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-11-07
+
+### Added
+
+- Toolbar Find button to reopen and focus search without a keyboard shortcut.
+
+### Changed
+
+- Show Width / Height by default; the row can be closed and reopened from Format or the cell context menu.
+- Use enclosed native buttons, subtle search-option colors and standard-height search fields.
+- Translate the English README from the revised Chinese guide and refresh Inspector screenshots.
+
+### Fixed
+
+- Allocate layout regions and register grid scroll controls before processing input, keeping worksheet tabs and scrollbars in place while buttons are held.
+- Use a native horizontal scrollbar for worksheet tabs without a second ScrollView state.
+
+## [1.1.0] - 2026-11-06
+
+### Added
+
+- Find/Replace bar with case-sensitive, whole-word and .NET Regex matching, matching-cell counts, previous/next navigation and selection scope.
+- Replace one or all matching cells, including regex capture-group replacement and a single Undo step for Replace All.
+- Ctrl/Cmd+F, Ctrl/Cmd+H, Enter/Shift+Enter, F3/Shift+F3 and Escape shortcuts for search.
+- Source patch and build script for the MIT-only ClosedXML variant.
+
+### Changed
+
+- Remove SixLabors.Fonts, embedded CarlitoBare fonts and the now-unused Unsafe assembly; keep workbook styles and images, using Unity for text measurements.
+- Remove the unused Documentation~ directory and the File behavior/Development README sections.
+- Synchronize numbered English and Chinese documentation and update search screenshots.
+
+### Fixed
+
+- Keep worksheet tab browsing and grid scroll positions unchanged while pressing search options or expanding Replace.
+
 ## [1.0.0] - 2026-11-06
 
 Initial release: edit configuration tables in the Unity Inspector.

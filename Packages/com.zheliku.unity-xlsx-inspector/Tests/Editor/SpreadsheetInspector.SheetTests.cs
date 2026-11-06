@@ -92,6 +92,99 @@ namespace XlsxInspector.Tests
                     }
                 }
                 window.SendEvent(new Event { type = EventType.MouseUp, button = 0, mousePosition = handle + new Vector2(0, -99) });
+                SetField("_showReplace", true);
+                Invoke("SwitchSheet", 0);
+                yield return SettleLayout(window);
+                Rect find = GetField<Rect>("_findInputRect");
+                Rect replace = GetField<Rect>("_replaceInputRect");
+                Rect searchArea = GetField<Rect>("_searchAreaRect");
+                Assert.That(replace.x, Is.EqualTo(find.x).Within(.1f));
+                Assert.That(replace.width, Is.GreaterThanOrEqualTo(find.width));
+                Assert.That(replace.height, Is.EqualTo(find.height).Within(.1f));
+                Assert.That(replace.height, Is.EqualTo(EditorGUIUtility.singleLineHeight));
+                Assert.That(searchArea.height, Is.LessThanOrEqualTo(48));
+                Assert.That(replace.xMax, Is.GreaterThanOrEqualTo(searchArea.xMax - 150));
+
+                // 主动浏览到远处页签，再分别检查按钮按下、重绘与松开；搜索操作不能定位当前 Sheet。
+                viewport = GetField<Rect>("_sheetViewportRect");
+                window.SendEvent(new Event
+                {
+                    type = EventType.ScrollWheel,
+                    delta = new Vector2(0, 60),
+                    mousePosition = inspector.worldBound.position + viewport.center
+                });
+                yield return SettleLayout(window);
+                float browsing = GetField<Vector2>("_sheetScroll").x;
+                Assert.That(browsing, Is.GreaterThan(500));
+                // 上方操作栏会在滚动区登记前消费鼠标事件；检查按下当帧，不能只等重绘后再比较。
+                SetField("_scroll", new Vector2(220, 180));
+                yield return SettleLayout(window);
+                Vector2 copy = inspector.worldBound.position + GetField<Rect>("_copyButtonRect").center;
+                Vector2 beforeCopy = GetField<Vector2>("_scroll");
+                Vector2 beforeCopyViewport = GetField<Vector2>("_viewportSize");
+                Rect beforeCopyTabs = GetField<Rect>("_sheetTabsRect");
+                window.SendEvent(new Event { type = EventType.MouseDown, button = 0, mousePosition = copy });
+                Assert.That(GetField<Vector2>("_sheetScroll").x, Is.EqualTo(browsing).Within(1), "Toolbar MouseDown immediately");
+                Assert.That(GetField<Vector2>("_viewportSize"), Is.EqualTo(beforeCopyViewport));
+                double holdUntil = EditorApplication.timeSinceStartup + .75;
+                while (EditorApplication.timeSinceStartup < holdUntil)
+                {
+                    window.Repaint();
+                    yield return null;
+                    Assert.That(GetField<Vector2>("_sheetScroll").x, Is.EqualTo(browsing).Within(1), "Toolbar hold");
+                    Assert.That(GetField<Vector2>("_scroll"), Is.EqualTo(beforeCopy), "Grid hold");
+                    Assert.That(GetField<Vector2>("_viewportSize"), Is.EqualTo(beforeCopyViewport));
+                    Assert.That(GetField<Rect>("_sheetTabsRect"), Is.EqualTo(beforeCopyTabs));
+                }
+                window.SendEvent(new Event { type = EventType.MouseUp, button = 0, mousePosition = copy });
+                Assert.That(GetField<Vector2>("_sheetScroll").x, Is.EqualTo(browsing).Within(1), "Toolbar MouseUp immediately");
+                yield return SettleLayout(window);
+                string[] optionFields = { "_matchCase", "_wholeWord", "_useRegex", "_searchSelection" };
+                for (int option = 0; option < 4; option++)
+                {
+                    bool wasEnabled = GetField<bool>(optionFields[option]);
+                    Rect[] options = GetField<Rect[]>("_searchOptionRects");
+                    Vector2 click = inspector.worldBound.position + options[option].center;
+                    Vector2 gridScroll = GetField<Vector2>("_scroll");
+                    window.SendEvent(new Event { type = EventType.MouseDown, button = 0, mousePosition = click });
+                    Assert.That(GetField<Vector2>("_sheetScroll").x, Is.EqualTo(browsing).Within(1), "Option MouseDown immediately: " + option);
+                    yield return SettleLayout(window);
+                    Assert.That(GetField<Vector2>("_sheetScroll").x, Is.EqualTo(browsing).Within(1), "MouseDown: " + option);
+                    Assert.That(GetField<Vector2>("_scroll"), Is.EqualTo(gridScroll), "Grid MouseDown: " + option);
+                    window.SendEvent(new Event { type = EventType.MouseUp, button = 0, mousePosition = click });
+                    Assert.That(GetField<Vector2>("_sheetScroll").x, Is.EqualTo(browsing).Within(1), "Option MouseUp immediately: " + option);
+                    yield return SettleLayout(window);
+                    Assert.That(GetField<Vector2>("_sheetScroll").x, Is.EqualTo(browsing).Within(1), "MouseUp: " + option);
+                    Assert.That(GetField<bool>(optionFields[option]), Is.EqualTo(!wasEnabled));
+                    Assert.That(Document.SheetIndex, Is.Zero);
+                }
+                // 尺寸设置按需展开；关闭按钮不应改变远处页签的浏览位置或网格滚动位置。
+                Assert.That(GetField<bool>("_showDimensions"), Is.True);
+                Vector2 beforeDimensions = GetField<Vector2>("_scroll");
+                Rect dimensions = GetField<Rect>("_dimensionsRect");
+                Assert.That(dimensions.height, Is.EqualTo(EditorGUIUtility.singleLineHeight + 6));
+                Assert.That(GetField<Vector2>("_sheetScroll").x, Is.EqualTo(browsing).Within(1));
+                Assert.That(GetField<Vector2>("_scroll"), Is.EqualTo(beforeDimensions));
+                Vector2 closeDimensions = inspector.worldBound.position + new Vector2(dimensions.xMax - 12, dimensions.center.y);
+                window.SendEvent(new Event { type = EventType.MouseDown, button = 0, mousePosition = closeDimensions });
+                yield return SettleLayout(window);
+                Assert.That(GetField<Vector2>("_sheetScroll").x, Is.EqualTo(browsing).Within(1));
+                window.SendEvent(new Event { type = EventType.MouseUp, button = 0, mousePosition = closeDimensions });
+                yield return SettleLayout(window);
+                Assert.That(GetField<bool>("_showDimensions"), Is.False);
+                Assert.That(GetField<Rect>("_dimensionsRect"), Is.EqualTo(Rect.zero));
+                Assert.That(GetField<Vector2>("_sheetScroll").x, Is.EqualTo(browsing).Within(1));
+                Assert.That(GetField<Vector2>("_scroll"), Is.EqualTo(beforeDimensions));
+                for (int fold = 0; fold < 2; fold++)
+                {
+                    Vector2 click = inspector.worldBound.position + GetField<Rect>("_searchFoldoutRect").center;
+                    window.SendEvent(new Event { type = EventType.MouseDown, button = 0, mousePosition = click });
+                    yield return SettleLayout(window);
+                    Assert.That(GetField<Vector2>("_sheetScroll").x, Is.EqualTo(browsing).Within(1), "Foldout MouseDown");
+                    window.SendEvent(new Event { type = EventType.MouseUp, button = 0, mousePosition = click });
+                    yield return SettleLayout(window);
+                    Assert.That(GetField<Vector2>("_sheetScroll").x, Is.EqualTo(browsing).Within(1), "Foldout MouseUp");
+                }
                 Assert.That(Document.IsDirty, Is.False);
             }
             finally

@@ -3,6 +3,6 @@
   "rootNamespace": "XlsxInspector",
   "includePlatforms": ["Editor"],
   "overrideReferences": true,
-  "precompiledReferences": ["ClosedXML.dll", "ClosedXML.Parser.dll", "DocumentFormat.OpenXml.dll", "DocumentFormat.OpenXml.Framework.dll", "ExcelNumberFormat.dll", "RBush.dll", "SixLabors.Fonts.dll", "System.IO.Packaging.dll", "System.Runtime.CompilerServices.Unsafe.dll"],
+  "precompiledReferences": ["ClosedXML.dll", "ClosedXML.Parser.dll", "DocumentFormat.OpenXml.dll", "DocumentFormat.OpenXml.Framework.dll", "ExcelNumberFormat.dll", "RBush.dll", "System.IO.Packaging.dll"],
   "autoReferenced": true
 }

@@ -51,37 +51,39 @@ namespace XlsxInspector
         }
 
         // 使用 Inspector 内联输入区，不为数量输入再创建独立 Editor Window。
-        private void DrawInsertionControls()
+        private void DrawInsertionControls(Rect area)
         {
             if (!_showInsertion)
             {
                 return;
             }
             using (new EditorGUI.DisabledScope(!_writable))
-            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                GUILayout.Label(_insertRows ? "Insert multiple rows" : "Insert multiple columns", EditorStyles.boldLabel);
-                _insertCount = EditorGUILayout.IntField(new GUIContent("Count", "Number of rows or columns to insert. The whole operation can be undone in one step."), _insertCount);
-                _insertPosition = EditorGUILayout.Popup(new GUIContent("Position", "Insert beside the selection, or after the allocated table range, including previously appended blank rows and columns."), _insertPosition, _insertRows
+                GUI.Box(area, GUIContent.none, EditorStyles.helpBox);
+                var line = new Rect(area.x + 6, area.y + 4, area.width - 12, EditorGUIUtility.singleLineHeight);
+                GUI.Label(line, _insertRows ? "Insert multiple rows" : "Insert multiple columns", EditorStyles.boldLabel);
+                line.y += line.height + 2;
+                _insertCount = EditorGUI.IntField(line, new GUIContent("Count", "Number of rows or columns to insert. The whole operation can be undone in one step."), _insertCount);
+                line.y += line.height + 2;
+                _insertPosition = EditorGUI.Popup(line, new GUIContent("Position", "Insert beside the selection, or after the allocated table range, including previously appended blank rows and columns."), _insertPosition, _insertRows
                     ? new[] { new GUIContent("Above selection"), new GUIContent("Below selection"), new GUIContent("End of table") }
                     : new[] { new GUIContent("Left of selection"), new GUIContent("Right of selection"), new GUIContent("End of table") });
-                using (new EditorGUILayout.HorizontalScope())
+                line.y += line.height + 2;
+                float buttonWidth = (line.width - 4) / 2;
+                using (new EditorGUI.DisabledScope(_insertCount <= 0))
                 {
-                    using (new EditorGUI.DisabledScope(_insertCount <= 0))
+                    if (GUI.Button(new Rect(line.x, line.y, buttonWidth, line.height), new GUIContent("Insert", "Insert the requested rows or columns. Ctrl/Cmd+Z undoes the batch.")))
                     {
-                        if (GUILayout.Button(new GUIContent("Insert", "Insert the requested rows or columns. Ctrl/Cmd+Z undoes the batch.")))
-                        {
-                            int index = _insertPosition == 2 ? (_insertRows ? _document.RowCount : _document.ColumnCount)
-                                : _insertRows ? (_insertPosition == 0 ? MinRow : MaxRow + 1)
-                                : (_insertPosition == 0 ? MinColumn : MaxColumn + 1);
-                            InsertStructure(index, _insertRows, _insertCount);
-                            _showInsertion = !string.IsNullOrEmpty(_error);
-                        }
+                        int index = _insertPosition == 2 ? (_insertRows ? _document.RowCount : _document.ColumnCount)
+                            : _insertRows ? (_insertPosition == 0 ? MinRow : MaxRow + 1)
+                            : (_insertPosition == 0 ? MinColumn : MaxColumn + 1);
+                        InsertStructure(index, _insertRows, _insertCount);
+                        _showInsertion = !string.IsNullOrEmpty(_error);
                     }
-                    if (GUILayout.Button(new GUIContent("Cancel", "Close the insertion controls without inserting.")))
-                    {
-                        _showInsertion = false;
-                    }
+                }
+                if (GUI.Button(new Rect(line.xMax - buttonWidth, line.y, buttonWidth, line.height), new GUIContent("Cancel", "Close the insertion controls without inserting.")))
+                {
+                    _showInsertion = false;
                 }
             }
         }

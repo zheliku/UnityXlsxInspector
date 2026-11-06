@@ -46,7 +46,6 @@ namespace XlsxInspector
         private bool _editChanged; // 文本尚未提交到文档时为 true。
         private bool _editingInline; // 是否正在单元格内部编辑文本。
         private bool _focusInline; // 新建格内控件后，在下一次绘制时把键盘焦点交给它。
-        private string _search = ""; // 当前 Sheet 的搜索关键词。
 
         // 网格状态：前缀坐标数组可快速定位任意尺寸的行列及滚动位置。
         private Vector2 _scroll; // 当前网格的水平和垂直滚动距离。

@@ -77,16 +77,39 @@ namespace XlsxInspector
             }
             int gridControl = GUIUtility.GetControlID(FocusType.Keyboard);
             int resizeControl = GUIUtility.GetControlID(FocusType.Passive);
+
+            EditorGUI.DrawRect(area, GridLine);
+            // 此处只登记原生滚动条和滚轮状态；单元格稍后通过 Group 使用同一滚动位置绘制。
+            _scroll = GUI.BeginScrollView(body, _scroll, new Rect(0, 0, _columnEdges[_columns], _rowEdges[_rows]));
+            GUI.EndScrollView();
+            // 滚动控件先登记，点击、拖选和调整尺寸随后处理，不让消费事件改变滚动控件的 ID。
             HandleResize(area, resizeControl);
             HandleGridMouse(new Rect(body.position, _viewportSize), gridControl);
+            // 滚轮或滚动条可能在本次 BeginScrollView 中改变位置；补出下一屏，不让用户撞到预览边界。
+            if (Event.current.type != EventType.Layout)
+            {
+                EnsurePreviewAt(_scroll + _viewportSize);
+                if (Event.current.type == EventType.Repaint && GUIUtility.hotControl == 0)
+                {
+                    // BeginScrollView 可能应用上一轮滚轮事件的位置；取得新位置后才能决定可回收范围。
+                    ReleaseUnusedPreview();
+                }
+            }
+        }
 
+
+        // 先创建固定数量的滚动控件，再绘制搜索输入，最后才绘制数量随视口变化的单元格。
+        // 两层 Group 只负责裁切和坐标平移，不再创建第二套滚动条或滚动状态。
+        private void DrawGridCells(Rect area)
+        {
+            var viewport = new Rect(area.x + RowHeaderWidth, area.y + HeaderHeight, _viewportSize.x, _viewportSize.y);
+            var body = new Rect(viewport.position, viewport.size);
             Color background = GridBackground;
             Color stripe = _palette.Alternate;
             int tableRows = _dataRows;
             int tableColumns = _dataColumns;
-            EditorGUI.DrawRect(area, GridLine);
-            // BeginScrollView 会同时转换绘制和鼠标坐标，内部单元格使用表格内容坐标而不是窗口坐标。
-            _scroll = GUI.BeginScrollView(body, _scroll, new Rect(0, 0, _columnEdges[_columns], _rowEdges[_rows]));
+            GUI.BeginGroup(viewport);
+            GUI.BeginGroup(new Rect(-_scroll.x, -_scroll.y, _columnEdges[_columns], _rowEdges[_rows]));
             int firstRow = FindIndex(_rowEdges, _scroll.y);
             int firstColumn = FindIndex(_columnEdges, _scroll.x);
             for (int row = firstRow; row < _rows && _rowEdges[row] < _scroll.y + body.height; row++)
@@ -115,7 +138,7 @@ namespace XlsxInspector
                     CellFormat format = GetDisplayFormat(row, column);
                     _cellStyle.alignment = GetTextAnchor(row, column, format);
                     _cellStyle.wordWrap = format.WrapText;
-                    if (_search.Length > 0 && value.IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0)
+                    if (_searchCells.Contains(new Vector2Int(column, row)))
                     {
                         EditorGUI.DrawRect(new Rect(rect.x, rect.y, 3, rect.height), _palette.Search);
                     }
@@ -128,18 +151,8 @@ namespace XlsxInspector
             // 内容区的右边和下边保留可辨识的边界，空表时两个长度均为 0。
             EditorGUI.DrawRect(new Rect(_columnEdges[tableColumns] - 1, 0, 1, _rowEdges[tableRows]), Accent);
             EditorGUI.DrawRect(new Rect(0, _rowEdges[tableRows] - 1, _columnEdges[tableColumns], 1), Accent);
-            GUI.EndScrollView();
-            // 滚轮或滚动条可能在本次 BeginScrollView 中改变位置；补出下一屏，不让用户撞到预览边界。
-            if (Event.current.type != EventType.Layout)
-            {
-                EnsurePreviewAt(_scroll + _viewportSize);
-                if (Event.current.type == EventType.Repaint && GUIUtility.hotControl == 0)
-                {
-                    // BeginScrollView 可能应用上一轮滚轮事件的位置；取得新位置后才能决定可回收范围。
-                    ReleaseUnusedPreview();
-                }
-            }
-            DrawHeaders(area);
+            GUI.EndGroup();
+            GUI.EndGroup();
         }
 
 
