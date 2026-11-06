@@ -1,0 +1,18 @@
+{
+  "name": "com.zheliku.unity-xlsx-inspector",
+  "version": "1.0.0",
+  "displayName": "Unity Xlsx Inspector",
+  "description": "Preview and edit Excel workbooks and CSV files directly in the Unity Inspector.",
+  "unity": "2022.3",
+  "dependencies": {
+    "com.unity.modules.imgui": "1.0.0",
+    "com.unity.modules.jsonserialize": "1.0.0",
+    "com.unity.modules.uielements": "1.0.0"
+  },
+  "keywords": ["xlsx", "excel", "csv", "inspector", "editor"],
+  "author": { "name": "zheliku", "url": "https://github.com/zheliku" },
+  "license": "MIT",
+  "documentationUrl": "https://github.com/zheliku/UnityXlsxInspector#readme",
+  "changelogUrl": "https://github.com/zheliku/UnityXlsxInspector/blob/main/Packages/com.zheliku.unity-xlsx-inspector/CHANGELOG.md",
+  "licensesUrl": "https://github.com/zheliku/UnityXlsxInspector/blob/main/Packages/com.zheliku.unity-xlsx-inspector/LICENSE.md"
+}

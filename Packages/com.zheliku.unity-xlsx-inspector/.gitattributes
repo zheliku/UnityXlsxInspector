@@ -1,0 +1,2 @@
+# UPM Git dependencies must contain real assemblies, not Git LFS pointer files.
+Editor/Plugins/*.dll -filter -diff -merge -text
