@@ -2,6 +2,30 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-14
+
+### Added
+
+- Import `.xlsx` files as `XlsxAsset`, with a runtime assembly for typed references and access to the workbook's original bytes.
+- Bundle the existing XLSX file icon for both the Project window and Inspector.
+- Create GitHub Releases with an installable UPM tarball when a version tag is pushed.
+
+### Changed
+
+- Register the XLSX Inspector only for `XlsxAsset`; CSV keeps Unity's `TextAsset` importer and text preview fallback.
+- Complete reimport before Save returns so resource bytes are current and consecutive saves do not overlap a background import.
+- Resolve the bundled icon relative to the importer's package.
+- Store the package icon directly in Git so Git URL installs do not need Git LFS.
+
+### Upgrading
+
+- XLSX files now import as `XlsxAsset` instead of `DefaultAsset`. Change serialized workbook fields to `XlsxAsset` and assign the workbook again. CSV remains `TextAsset`.
+- The runtime assembly contains the resource type and raw bytes. Excel parsing libraries remain Editor-only; runtime parsing uses the consuming project's reader.
+
+### Validation
+
+- 81 EditMode tests passed on Windows with Unity 2022.3.62f3, 6000.0.70f1 and 6000.3.24f1. Import, save, move and prefab-reference checks cover the new asset type.
+
 ## [1.1.1] - 2026-11-07
 
 ### Added

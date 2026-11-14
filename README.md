@@ -10,7 +10,7 @@ English | [简体中文](README.zh-CN.md)
 
 - Unity **2022.3 LTS or newer**, including Unity 6.
 - **.NET Standard 2.1** API compatibility.
-- Editor-only UPM package. Dependencies are bundled.
+- UPM package with a small runtime resource type. Spreadsheet editing and the bundled Excel libraries run in the Editor.
 
 | Tested Editor | Platform | Validation |
 | --- | --- | --- |
@@ -24,6 +24,8 @@ Open **Window → Package Manager → + → Install package from git URL** and p
 ```text
 https://github.com/zheliku/UnityXlsxInspector.git?path=/Packages/com.zheliku.unity-xlsx-inspector
 ```
+
+To install **v1.2.0**, append `#v1.2.0` to the URL. You can also download the `.tgz` from [GitHub Releases](https://github.com/zheliku/UnityXlsxInspector/releases) and choose **Install package from tarball**. Each pushed version tag creates a Release with the package and its Changelog entry.
 
 ## 3. Features
 
@@ -40,6 +42,24 @@ Select a range by dragging or Shift-clicking. Copy, cut, paste, clear, Undo and 
 XLSX worksheet tabs stay inside the Inspector width. Browse with the mouse wheel or horizontal scrollbar, use **‹ / ›** for the previous/next sheet, or **▾** to choose from the complete list. Switching sheets brings the active tab into view. CSV has no worksheet bar.
 
 ![Worksheet navigation](image/worksheet-tabs.png)
+
+XLSX files import as `XlsxInspector.XlsxAsset`. Other projects can reference them directly in a serialized field:
+
+```csharp
+using UnityEngine;
+using XlsxInspector;
+
+public sealed class TableSource : MonoBehaviour
+{
+    [SerializeField] private XlsxAsset _workbook;
+
+    public byte[] WorkbookBytes => _workbook.Bytes;
+}
+```
+
+The asset contains the original XLSX bytes, refreshed whenever the source file is reimported. Use your project's Excel reader to parse them at runtime. CSV files remain `TextAsset`. The Project window and Inspector use the bundled copy of the original spreadsheet icon.
+
+When upgrading code that referenced an XLSX as `DefaultAsset`, change the field type to `XlsxAsset` and assign the workbook again.
 
 ### 3.3 Rows, columns and sizing
 

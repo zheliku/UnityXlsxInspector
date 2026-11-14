@@ -381,9 +381,9 @@ namespace XlsxInspector.Tests
             Assert.That(reopened.GetText(0, 0), Is.EqualTo("edited"));
         }
 
-        /// <summary>通过 Unity 实际导入验证原生图标类型、Inspector 注册和复制切换返回流程。</summary>
+        /// <summary>通过 Unity 实际导入验证 XLSX 专用资源、CSV 原生类型及复制切换返回流程。</summary>
         [Test]
-        public void NativeXlsxAndCsvAssetsUseSpreadsheetInspectors()
+        public void XlsxAndCsvAssetsUseSpreadsheetInspectors()
         {
             string folder = "Assets/__XlsxInspectorTest_" + Guid.NewGuid().ToString("N");
             AssetDatabase.CreateFolder("Assets", Path.GetFileName(folder));
@@ -397,7 +397,9 @@ namespace XlsxInspector.Tests
                 AssetDatabase.ImportAsset(csv);
                 var xlsxAsset = AssetDatabase.LoadMainAssetAtPath(xlsx);
                 var csvAsset = AssetDatabase.LoadMainAssetAtPath(csv);
-                Assert.That(xlsxAsset, Is.TypeOf<DefaultAsset>(), "Keep Unity's original xlsx importer and icon.");
+                Assert.That(xlsxAsset, Is.TypeOf<XlsxAsset>());
+                Assert.That(AssetImporter.GetAtPath(xlsx), Is.TypeOf<XlsxImporter>());
+                Assert.That(((XlsxAsset)xlsxAsset).Bytes, Is.EqualTo(File.ReadAllBytes(xlsx)));
                 Assert.That(csvAsset, Is.TypeOf<TextAsset>());
                 var xlsxEditor = Editor.CreateEditor(xlsxAsset);
                 var csvEditor = Editor.CreateEditor(csvAsset);
@@ -429,14 +431,13 @@ namespace XlsxInspector.Tests
 
         /// <summary>验证非表格 TextAsset 仍然可以创建 Unity 原生文本预览。</summary>
         [Test]
-        public void InspectorsKeepDefaultAssetsAndNonSpreadsheetInspectors()
+        public void NonSpreadsheetTextKeepsUnityTextInspector()
         {
             var text = new TextAsset("standard text preview");
             var inspector = Editor.CreateEditor(text);
             try
             {
                 Assert.That(inspector, Is.TypeOf<CsvInspector>());
-                Assert.That(typeof(Editor).Assembly.GetType("UnityEditor.DefaultAssetInspector"), Is.Not.Null);
                 Assert.That(typeof(Editor).Assembly.GetType("UnityEditor.TextAssetInspector"), Is.Not.Null);
             }
             finally { UnityEngine.Object.DestroyImmediate(inspector); UnityEngine.Object.DestroyImmediate(text); }

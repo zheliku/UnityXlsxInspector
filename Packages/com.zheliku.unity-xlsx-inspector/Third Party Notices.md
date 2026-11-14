@@ -15,3 +15,5 @@ This package includes the following MIT-licensed assemblies for use in the Unity
 The ClosedXML build removes the SixLabors.Fonts dependency and all embedded CarlitoBare font resources. It uses the included image readers and a fixed digit-width baseline; this package performs text measurements with Unity. The replacement source and build script are in [Tools~/ClosedXml](Tools~/ClosedXml). Upstream workbook parsing, editing, formulas and image readers are retained.
 
 Unity Xlsx Inspector's own source code is licensed under [MIT](LICENSE.md). That license does not replace the licenses listed above.
+
+`Editor/Icons/xlsx.png` preserves the spreadsheet file icon originally shown by Unity on the development machine. The icon is third-party artwork used to identify XLSX files; its original artwork and trademark rights are retained and are not covered by this project's MIT license.

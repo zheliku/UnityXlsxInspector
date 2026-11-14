@@ -8,14 +8,14 @@ using UnityEngine;
 namespace XlsxInspector
 {
     /// <summary>
-    /// 在 Project 资源的 Inspector 中显示和编辑表格，保留 Unity 原有导入器及图标。
+    /// 在 Project 资源的 Inspector 中显示和编辑表格。
     /// </summary>
     /// <remarks>
-    /// Excel 以 DefaultAsset 导入，CSV 以 TextAsset 导入；两种资源共用此界面。
+    /// Excel 以 XlsxAsset 导入，CSV 保留 TextAsset；两种资源共用此界面。
     /// IMGUI 每次事件都会重新执行绘制方法，因此文件读取放在 OnEnable，
     /// 文档修改放在输入处理方法，绘制阶段只读取当前状态。
     /// </remarks>
-    [CustomEditor(typeof(DefaultAsset))]
+    [CustomEditor(typeof(XlsxAsset))]
     [CanEditMultipleObjects]
     public partial class SpreadsheetInspector : Editor
     {
@@ -109,19 +109,17 @@ namespace XlsxInspector
         {
             _assetPath = AssetDatabase.GetAssetPath(target);
             string extension = Path.GetExtension(_assetPath);
-            bool spreadsheet = extension.Equals(".xlsx", StringComparison.OrdinalIgnoreCase)
-                || extension.Equals(".csv", StringComparison.OrdinalIgnoreCase);
+            bool spreadsheet = target is XlsxAsset || extension.Equals(".csv", StringComparison.OrdinalIgnoreCase);
             if (targets.Length != 1 || !spreadsheet)
             {
-                string type = target is TextAsset ? "UnityEditor.TextAssetInspector" : "UnityEditor.DefaultAssetInspector";
+                string type = target is TextAsset ? "UnityEditor.TextAssetInspector" : "UnityEditor.GenericInspector";
                 _defaultInspector = CreateEditor(targets, typeof(Editor).Assembly.GetType(type));
                 return;
             }
 
             string projectPath = Path.GetDirectoryName(Application.dataPath);
             var package = UnityEditor.PackageManager.PackageInfo.FindForAssetPath(_assetPath);
-            _filePath = package == null ? Path.Combine(projectPath, _assetPath)
-                : Path.Combine(package.resolvedPath, _assetPath.Substring(package.assetPath.Length + 1));
+            _filePath = Path.GetFullPath(FileUtil.GetPhysicalPath(_assetPath));
             string guid = AssetDatabase.AssetPathToGUID(_assetPath);
             _draftPath = Path.Combine(projectPath, "Library", "XlsxInspector", guid + ".json");
             _layoutKey = "XlsxInspector.Layout." + guid;
@@ -201,10 +199,6 @@ namespace XlsxInspector
         }
 
         /// <summary>绘制表格，并处理当前 GUI 事件。此方法由 Unity 的 Inspector 自动调用。</summary>
-        /// <remarks>
-        /// Unity 默认禁用 DefaultAsset 的外层 GUI。这里临时启用自己的文件编辑区域，
-        /// 再由文件权限控制可编辑按钮，结束后恢复调用者原本的 GUI 状态。
-        /// </remarks>
         public override void OnInspectorGUI()
         {
             if (_defaultInspector != null)
@@ -213,16 +207,7 @@ namespace XlsxInspector
                 return;
             }
 
-            bool previousEnabled = GUI.enabled;
-            GUI.enabled = true;
-            try
-            {
-                DrawSpreadsheet();
-            }
-            finally
-            {
-                GUI.enabled = previousEnabled;
-            }
+            DrawSpreadsheet();
         }
 
         /// <summary>非表格资源继续使用 Unity 原有的预览区域。</summary>
@@ -265,7 +250,8 @@ namespace XlsxInspector
                 {
                     File.Delete(_draftPath);
                 }
-                AssetDatabase.ImportAsset(_assetPath);
+                // 保存完成时让引用者立即读到新的导入数据，也避免下一次保存与后台导入争用文件。
+                AssetDatabase.ImportAsset(_assetPath, ImportAssetOptions.ForceSynchronousImport);
                 GUIUtility.keyboardControl = 0;
                 EditorGUIUtility.editingTextField = false;
             });

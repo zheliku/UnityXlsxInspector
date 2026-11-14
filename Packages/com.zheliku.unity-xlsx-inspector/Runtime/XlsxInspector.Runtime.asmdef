@@ -1,0 +1,5 @@
+{
+  "name": "XlsxInspector.Runtime",
+  "rootNamespace": "XlsxInspector",
+  "autoReferenced": true
+}
