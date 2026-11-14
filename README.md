@@ -10,7 +10,7 @@ English | [简体中文](README.zh-CN.md)
 
 - Unity **2022.3 LTS or newer**, including Unity 6.
 - **.NET Standard 2.1** API compatibility.
-- UPM package with a small runtime resource type. Spreadsheet editing and the bundled Excel libraries run in the Editor.
+- Install through UPM or import a `.unitypackage`. Spreadsheet editing and the bundled Excel libraries run in the Editor; a small runtime resource type exposes the workbook bytes.
 
 | Tested Editor | Platform | Validation |
 | --- | --- | --- |
@@ -25,7 +25,11 @@ Open **Window → Package Manager → + → Install package from git URL** and p
 https://github.com/zheliku/UnityXlsxInspector.git?path=/Packages/com.zheliku.unity-xlsx-inspector
 ```
 
-To install **v1.2.0**, append `#v1.2.0` to the URL. You can also download the `.tgz` from [GitHub Releases](https://github.com/zheliku/UnityXlsxInspector/releases) and choose **Install package from tarball**. Each pushed version tag creates a Release with the package and its Changelog entry.
+To install **v1.2.1**, append `#v1.2.1` to the URL. You can also download the `.tgz` from [GitHub Releases](https://github.com/zheliku/UnityXlsxInspector/releases) and choose **Install package from tarball**.
+
+For an Assets installation, download `UnityXlsxInspector-1.2.1.unitypackage` from the same Release and open **Assets → Import Package → Custom Package**. Files are imported into `Assets/UnityXlsxInspector`. Choose one installation method per project; remove an existing UPM installation before importing the `.unitypackage`.
+
+Each pushed version tag publishes both packages and the corresponding Changelog entry.
 
 ## 3. Features
 

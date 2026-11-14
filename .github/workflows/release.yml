@@ -42,12 +42,16 @@ jobs:
       - name: Pack the UPM package
         run: npm pack "./$PACKAGE_DIR" --pack-destination "$RUNNER_TEMP" --ignore-scripts
 
-      - name: Create GitHub Release and upload package
+      - name: Pack the Assets package
+        run: python3 .github/scripts/pack_unitypackage.py "$PACKAGE_DIR" "$RUNNER_TEMP"
+
+      - name: Create GitHub Release and upload packages
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$RELEASE_TAG" \
             "$RUNNER_TEMP/$PACKAGE_NAME-$PACKAGE_VERSION.tgz" \
+            "$RUNNER_TEMP/UnityXlsxInspector-$PACKAGE_VERSION.unitypackage" \
             --verify-tag \
             --title "$RELEASE_TAG" \
             --notes-file "$RUNNER_TEMP/release-notes.md"

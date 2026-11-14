@@ -17,9 +17,8 @@ namespace XlsxInspector
             var asset = ScriptableObject.CreateInstance<XlsxAsset>();
             asset.name = Path.GetFileNameWithoutExtension(context.assetPath);
             asset.Bytes = File.ReadAllBytes(FileUtil.GetPhysicalPath(context.assetPath));
-            // Unity 提供当前程序集所属包的资源路径，只固定图标在包内的位置。
-            var package = UnityEditor.PackageManager.PackageInfo.FindForAssembly(typeof(XlsxImporter).Assembly);
-            string iconPath = package.assetPath + "/Editor/Icons/xlsx.png";
+            // GUID 随图标的 .meta 一起分发，安装到 Packages 或 Assets、移动目录后都能定位。
+            string iconPath = AssetDatabase.GUIDToAssetPath("21f5a65f8bb928d458bcab9e4f2fcd29");
             context.DependsOnSourceAsset(iconPath);
             Texture2D icon = AssetDatabase.LoadAssetAtPath<Texture2D>(iconPath);
             EditorGUIUtility.SetIconForObject(asset, icon);

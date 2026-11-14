@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-11-14
+
+### Added
+
+- Publish an Assets-installable `.unitypackage` alongside the UPM tarball in each GitHub Release. It includes the Editor, runtime asset type, bundled libraries and full license texts.
+
+### Fixed
+
+- Locate the XLSX icon by its asset GUID so it works with both UPM and Assets installations, including after moving the installation folder.
+
+### Validation
+
+- Imported the `.unitypackage` into separate Unity 2022.3.62f3 and 6000.3.24f1 projects; all 81 EditMode tests passed in each, including after relocating the Assets installation.
+
 ## [1.2.0] - 2026-11-14
 
 ### Added
